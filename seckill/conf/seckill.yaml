@@ -1,0 +1,20 @@
+host: 0.0.0.0
+port: 8082
+
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0
+
+mq:
+  type: "redis_stream"
+  redis_stream_key: "seckill:queue"
+
+etcd:
+    endpoints:
+      - "127.0.0.1:2379"
+mysql:
+  dsn: "root:root@tcp(127.0.0.1:3307)/seckill?charset=utf8mb4&parseTime=True&loc=Local"
+
+rabbitmq:
+  addr: "amqp://admin:admin@127.0.0.1:5672/"

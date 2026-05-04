@@ -1,0 +1,14 @@
+host: 0.0.0.0
+port: 8083
+
+mysql:
+  dsn: "root:root@tcp(127.0.0.1:3307)/seckill?charset=utf8mb4&parseTime=True&loc=Local"
+
+mq:
+  type: "redis_stream"
+  redis_stream_key: "seckill:queue"
+  redis_addr: "127.0.0.1:6379"
+
+etcd:
+  endpoints:
+    - "127.0.0.1:2379"
