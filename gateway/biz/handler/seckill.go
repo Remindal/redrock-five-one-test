@@ -22,6 +22,11 @@ func DoSeckill(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// JWT 鉴权：优先从 token 解析的上下文取 user_id，防止伪造
+	if uid, exists := c.Get("user_id"); exists {
+		req.UserId = uid.(string)
+	}
+
 	resp, err := rpc.SeckillClient.DoSeckill(ctx, &seckill.DoSeckillReq{
 		ActivityId: req.ActivityId,
 		UserId:     req.UserId,

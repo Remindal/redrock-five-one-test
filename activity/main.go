@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	addr, _ := net.ResolveTCPAddr("tcp", cfg.Host+":"+cfg.Port)
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:"+cfg.Port)
 	svr := activityservice.NewServer(
 		new(ActivityServiceImpl),
 		server.WithRegistry(r),

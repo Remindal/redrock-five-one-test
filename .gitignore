@@ -1,26 +1,24 @@
-# Binaries
 *.exe
 *.dll
 *.so
 *.dylib
 
-# Test binary
 *.test
 
-# Output of the go coverage tool
 *.out
 
-# Go workspace
 go.work
 go.work.sum
 
-# Dependency directories
 vendor/
 
-# IDE
 .idea/
 *.iml
 
-# OS
 .DS_Store
 Thumbs.db
+
+bin/
+logs/
+*.tar.gz
+*.pdf

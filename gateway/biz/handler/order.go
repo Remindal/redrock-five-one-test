@@ -16,6 +16,11 @@ func QueryOrder(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
 	orderIdStr := c.Query("order_id")
 
+	// JWT 鉴权：优先从 token 解析的上下文取 user_id
+	if uid, exists := c.Get("user_id"); exists {
+		userId = uid.(string)
+	}
+
 	var req order.QueryOrderReq
 
 	if orderIdStr != "" {

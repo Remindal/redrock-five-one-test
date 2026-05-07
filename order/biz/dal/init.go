@@ -1,9 +1,9 @@
 package dal
 
 import (
-	"activity/conf"
 	"context"
 	"log"
+	"order/conf"
 	"time"
 
 	"github.com/redis/go-redis/v9"

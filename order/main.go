@@ -2,6 +2,8 @@ package main
 
 import (
 	"net"
+	"order/biz/dal"
+	"order/biz/mq"
 	"order/conf"
 
 	"order/kitex_gen/order/orderservice"
@@ -14,12 +16,17 @@ import (
 func main() {
 	cfg := conf.LoadConfig()
 
+	dal.Init(cfg)
+	dal.InitRabbitMQ(cfg.RabbitMQ.Addr)
+
+	go mq.StartConsumer()
+
 	r, err := etcd.NewEtcdRegistry(cfg.Etcd.Endpoints)
 	if err != nil {
 		panic(err)
 	}
 
-	addr, _ := net.ResolveTCPAddr("tcp", cfg.Host+":"+cfg.Port)
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:"+cfg.Port)
 	svr := orderservice.NewServer(
 		new(OrderServiceImpl),
 		server.WithRegistry(r),

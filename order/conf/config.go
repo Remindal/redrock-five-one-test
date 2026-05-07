@@ -8,19 +8,32 @@ import (
 )
 
 type Config struct {
-	Host  string `yaml:"host"`
-	Port  string `yaml:"port"`
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+
 	Mysql struct {
 		DSN string `yaml:"dsn"`
 	} `yaml:"mysql"`
+
 	MQ struct {
 		Type           string `yaml:"type"`
 		RedisStreamKey string `yaml:"redis_stream_key"`
 		RedisAddr      string `yaml:"redis_addr"`
 	} `yaml:"mq"`
+
 	Etcd struct {
 		Endpoints []string `yaml:"endpoints"`
 	} `yaml:"etcd"`
+
+	Redis struct {
+		Addr     string `yaml:"addr"`
+		Password string `yaml:"password"`
+		DB       int    `yaml:"db"`
+	} `yaml:"redis"`
+
+	RabbitMQ struct {
+		Addr string `yaml:"addr"`
+	} `yaml:"rabbitmq"`
 }
 
 func LoadConfig() *Config {

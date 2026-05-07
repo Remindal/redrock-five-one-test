@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒杀系统 - Seckill System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ff6b35;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .status-tag {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #888;
+            transition: all 0.3s ease;
+        }
+
+        .status-tag.online {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .status-tag.offline {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .token-bar {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #888;
+            word-break: break-all;
+        }
+
+        .token-bar.active {
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .card {
+            background: #111111;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #ff6b35;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #ff6b35;
+            color: #000;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e5e5e5;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        input::placeholder {
+            color: #555;
+        }
+
+        button {
+            padding: 12px 28px;
+            background: #ff6b35;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #ff8555;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-box {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            min-height: 80px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            transition: all 0.3s ease;
+        }
+
+        .result-box.loading {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .result-box.success {
+            border-color: rgba(34, 197, 94, 0.4);
+            background: rgba(34, 197, 94, 0.05);
+            color: #22c55e;
+        }
+
+        .result-box.error {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.05);
+            color: #ef4444;
+        }
+
+        .result-box.warning {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.05);
+            color: #ff6b35;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ff6b35;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #1f1f1f;
+            color: #444;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 SECKILL SYSTEM</h1>
+            <p>Kitex + Hertz + RabbitMQ + etcd 微服务秒杀系统</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-tag" id="gatewayStatus">Gateway 检测中...</div>
+            <div class="status-tag">Redis :6379</div>
+            <div class="status-tag">MySQL :3307</div>
+            <div class="status-tag">RabbitMQ :5672</div>
+            <div class="status-tag">etcd :2379</div>
+        </div>
+
+        <div class="token-bar" id="tokenBar">未登录，请先登录获取 Token</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-number">1</div>
+                <div class="card-title">登录</div>
+            </div>
+            <div class="input-group">
+                <input id="loginUid" placeholder="user_id" value="user_001">
+                <button onclick="doLogin()" id="btnLogin">获取 Token</button>
+            </div>
+            <div class="result-box" id="loginResult">等待登录...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-number">2</div>
+                <div class="card-title">创建活动</div>
+            </div>
+            <div class="input-group">
+                <input id="name" placeholder="活动名称" value="五一秒杀">
+                <input id="stock" placeholder="库存数量" value="100" type="number">
+                <button onclick="createActivity()" id="btnCreate">创建活动</button>
+            </div>
+            <div class="result-box" id="createResult">等待创建活动...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-number">3</div>
+                <div class="card-title">秒杀下单</div>
+            </div>
+            <div class="input-group">
+                <input id="aid" placeholder="activity_id" type="number">
+                <button onclick="doSeckill()" id="btnSeckill">立即秒杀</button>
+            </div>
+            <div class="result-box" id="seckillResult">等待秒杀...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-number">4</div>
+                <div class="card-title">查询订单</div>
+            </div>
+            <div class="input-group">
+                <input id="qAid" placeholder="activity_id" type="number">
+                <button onclick="queryOrder()" id="btnQuery">查询订单</button>
+            </div>
+            <div class="result-box" id="queryResult">等待查询订单...</div>
+        </div>
+
+        <div class="footer">
+            Gateway: http://127.0.0.1:8888 | 请确保 4 个微服务已启动
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8888';
+        let token = localStorage.getItem('seckill_token') || '';
+
+        function updateTokenBar() {
+            const bar = document.getElementById('tokenBar');
+            if (token) {
+                bar.textContent = '已登录 | Token: ' + token.substring(0, 20) + '...';
+                bar.classList.add('active');
+            } else {
+                bar.textContent = '未登录，请先登录获取 Token';
+                bar.classList.remove('active');
+            }
+        }
+        updateTokenBar();
+
+        async function checkGateway() {
+            const tag = document.getElementById('gatewayStatus');
+            try {
+                await fetch(`${API}/api/auth/login`, { method: 'OPTIONS' });
+                tag.textContent = 'Gateway 在线 :8888';
+                tag.classList.add('online');
+            } catch {
+                tag.textContent = 'Gateway 离线';
+                tag.classList.add('offline');
+            }
+        }
+        checkGateway();
+        setInterval(checkGateway, 5000);
+
+        function setResult(el, text, type) {
+            el.textContent = text;
+            el.className = 'result-box ' + (type || '');
+        }
+
+        function getResultType(code) {
+            if (code === 200) return 'success';
+            if (code === 4005 || code === 4006) return 'warning';
+            return 'error';
+        }
+
+        function getHeaders() {
+            const h = { 'Content-Type': 'application/json' };
+            if (token) h['Authorization'] = 'Bearer ' + token;
+            return h;
+        }
+
+        async function doLogin() {
+            const resultEl = document.getElementById('loginResult');
+            const btn = document.getElementById('btnLogin');
+            btn.disabled = true;
+            setResult(resultEl, '登录中...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: document.getElementById('loginUid').value })
+                });
+                const data = await res.json();
+                setResult(resultEl, JSON.stringify(data, null, 2), getResultType(data.code));
+
+                if (data.code === 200 && data.token) {
+                    token = data.token;
+                    localStorage.setItem('seckill_token', token);
+                    updateTokenBar();
+                }
+            } catch (err) {
+                setResult(resultEl, '请求失败：' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function createActivity() {
+            const resultEl = document.getElementById('createResult');
+            const btn = document.getElementById('btnCreate');
+            btn.disabled = true;
+            setResult(resultEl, '创建中...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/activity/create`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        name: document.getElementById('name').value,
+                        stock: parseInt(document.getElementById('stock').value),
+                        start_time: '2024-01-01T00:00:00Z',
+                        end_time: '2026-12-31T23:59:59Z'
+                    })
+                });
+                const data = await res.json();
+                setResult(resultEl, JSON.stringify(data, null, 2), getResultType(data.code));
+
+                if (data.code === 200 && data.activity_id) {
+                    document.getElementById('aid').value = data.activity_id;
+                    document.getElementById('qAid').value = data.activity_id;
+                }
+            } catch (err) {
+                setResult(resultEl, '请求失败：' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function doSeckill() {
+            const resultEl = document.getElementById('seckillResult');
+            const btn = document.getElementById('btnSeckill');
+            btn.disabled = true;
+            setResult(resultEl, '秒杀中...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/seckill/do`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        activity_id: parseInt(document.getElementById('aid').value)
+                    })
+                });
+                const data = await res.json();
+                setResult(resultEl, JSON.stringify(data, null, 2), getResultType(data.code));
+            } catch (err) {
+                setResult(resultEl, '请求失败：' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function queryOrder() {
+            const resultEl = document.getElementById('queryResult');
+            const btn = document.getElementById('btnQuery');
+            btn.disabled = true;
+            setResult(resultEl, '查询中...', 'loading');
+
+            try {
+                const aid = document.getElementById('qAid').value;
+                const res = await fetch(`${API}/api/order/query?activity_id=${aid}`, {
+                    headers: { 'Authorization': token ? 'Bearer ' + token : '' }
+                });
+                const data = await res.json();
+                setResult(resultEl, JSON.stringify(data, null, 2), getResultType(data.code));
+            } catch (err) {
+                setResult(resultEl, '请求失败：' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

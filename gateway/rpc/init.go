@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"gateway/conf"
+	"time"
 
 	"github.com/cloudwego/kitex/client"
 	etcd "github.com/kitex-contrib/registry-etcd"
@@ -23,7 +24,22 @@ func Init(cfg *conf.Config) {
 		panic(err)
 	}
 
-	ActivityClient = activityservice.MustNewClient(cfg.Rpc.Activity, client.WithResolver(r))
-	SeckillClient = seckillservice.MustNewClient(cfg.Rpc.Seckill, client.WithResolver(r))
-	OrderClient = orderservice.MustNewClient(cfg.Rpc.Order, client.WithResolver(r))
+	ActivityClient = activityservice.MustNewClient(
+		cfg.Rpc.Activity,
+		client.WithResolver(r),
+		client.WithRPCTimeout(3*time.Second),
+		client.WithConnectTimeout(3*time.Second),
+	)
+	SeckillClient = seckillservice.MustNewClient(
+		cfg.Rpc.Seckill,
+		client.WithResolver(r),
+		client.WithRPCTimeout(3*time.Second),
+		client.WithConnectTimeout(3*time.Second),
+	)
+	OrderClient = orderservice.MustNewClient(
+		cfg.Rpc.Order,
+		client.WithResolver(r),
+		client.WithRPCTimeout(3*time.Second),
+		client.WithConnectTimeout(3*time.Second),
+	)
 }
