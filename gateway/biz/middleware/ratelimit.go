@@ -14,6 +14,11 @@ func RateLimit(maxQPS int64, windowSeconds int64) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		path := string(c.Request.Path())
 		now := time.Now().Unix()
+
+		if string(c.Path()) == "/api/auth/login" {
+			c.Next(ctx)
+			return
+		}
 		// 固定窗口：按时间戳取整
 		windowStart := now - (now % windowSeconds)
 		redisKey := fmt.Sprintf("ratelimit:%s:%d", path, windowStart)
