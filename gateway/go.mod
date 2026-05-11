@@ -6,6 +6,7 @@ require (
 	activity v0.0.0-00010101000000-000000000000
 	github.com/cloudwego/hertz v0.9.0
 	github.com/cloudwego/kitex v0.16.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/hertz-contrib/cors v0.1.0
 	github.com/kitex-contrib/registry-etcd v0.3.0
 	github.com/redis/go-redis/v9 v9.19.0
@@ -36,7 +37,6 @@ require (
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect

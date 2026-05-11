@@ -6,9 +6,6 @@ import (
 )
 
 // LuaStockDeduct Lua 原子扣减库存 + 防重
-// KEYS[1] = seckill:stock:{activityId}   (String)
-// KEYS[2] = seckill:users:{activityId}   (Set)
-// ARGV[1] = userId
 // 返回：1=成功, 0=库存不足, -1=已参与
 const LuaStockDeduct = `
 local stockKey = KEYS[1]

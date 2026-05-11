@@ -32,10 +32,10 @@ func InitRabbitMQ(addr string) {
 
 	_, err = RabbitCh.QueueDeclare(
 		"seckill_queue",
-		true,  // durable：持久化（重启不丢）
-		false, // autoDelete：不用了不自动删
-		false, // exclusive：不独占
-		false, // noWait：不等待
+		true,
+		false,
+		false,
+		false,
 		nil,
 	)
 	if err != nil {
