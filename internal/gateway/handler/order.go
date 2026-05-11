@@ -1,0 +1,46 @@
+package handler
+
+import (
+	"context"
+	"seckill-system/internal/gateway/rpc"
+	"seckill-system/pkg/errno"
+	"strconv"
+
+	"seckill-system/kitex_gen/order"
+
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
+)
+
+func QueryOrder(ctx context.Context, c *app.RequestContext) {
+	activityIdStr := c.Query("activity_id")
+	userId := c.Query("user_id")
+	orderIdStr := c.Query("order_id")
+
+	// JWT 鉴权：优先从 token 解析的上下文取 user_id
+	if uid, exists := c.Get("user_id"); exists {
+		userId = uid.(string)
+	}
+
+	var req order.QueryOrderReq
+
+	if orderIdStr != "" {
+		if id, err := strconv.ParseInt(orderIdStr, 10, 64); err == nil {
+			req.OrderId = &id
+		}
+	}
+	if activityIdStr != "" && userId != "" {
+		if id, err := strconv.ParseInt(activityIdStr, 10, 64); err == nil {
+			req.ActivityId = &id
+			req.UserId = &userId
+		}
+	}
+
+	resp, err := rpc.OrderClient.QueryOrder(ctx, &req)
+	if err != nil {
+		c.JSON(consts.StatusInternalServerError, map[string]interface{}{"code": errno.ErrInternal.Code, "msg": errno.ErrInternal.Msg})
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}

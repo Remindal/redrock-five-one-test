@@ -1,0 +1,143 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: seckill-mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: seckill
+      TZ: Asia/Shanghai
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: seckill-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.15
+    container_name: seckill-etcd
+    restart: always
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      ETCD_NAME: s1
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://127.0.0.1:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://127.0.0.1:2380
+      ETCD_INITIAL_CLUSTER: s1=http://127.0.0.1:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: token-01
+      ETCD_INITIAL_CLUSTER_STATE: new
+    volumes:
+      - etcd_data:/etcd-data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: seckill-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+
+  activity:
+      restart: always
+      build:
+        context: ..
+        dockerfile: Dockerfile
+        args:
+          SERVICE: activity
+      container_name: seckill-activity
+      ports:
+        - "8081:8081"
+      environment:
+        - ADVERTISE_HOST=activity
+      depends_on:
+        mysql:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        etcd:
+          condition: service_started
+
+  seckill:
+      restart: always
+      build:
+        context: ..
+        dockerfile: Dockerfile
+        args:
+          SERVICE: seckill
+      container_name: seckill-seckill
+      ports:
+        - "8082:8082"
+      environment:
+        - ADVERTISE_HOST=seckill
+      depends_on:
+        mysql:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        etcd:
+          condition: service_started
+
+  order:
+      restart: always
+      build:
+        context: ..
+        dockerfile: Dockerfile
+        args:
+          SERVICE: order
+      container_name: seckill-order
+      ports:
+        - "8083:8083"
+      environment:
+        - ADVERTISE_HOST=order
+      depends_on:
+        mysql:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        etcd:
+          condition: service_started
+
+  gateway:
+      restart: always
+      build:
+        context: ..
+        dockerfile: Dockerfile
+        args:
+          SERVICE: gateway
+      container_name: seckill-gateway
+      ports:
+        - "8888:8888"
+      depends_on:
+        mysql:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        etcd:
+          condition: service_started
+
+volumes:
+  mysql_data:
+  etcd_data:
+  redis_data:
