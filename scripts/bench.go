@@ -191,11 +191,11 @@ func checkConsistency(activityId int64, successCount int64) {
 	// 4. 结论
 	fmt.Println("\n========== 检查结论 ==========")
 	pass := true
-	if stock != 0 {
-		fmt.Printf("❌ Redis 库存不为 0 (实际: %d)\n", stock)
+	if stock < 0 {
+		fmt.Printf("❌ Redis 库存为负 (实际: %d)，存在超卖\n", stock)
 		pass = false
 	} else {
-		fmt.Println("✅ Redis 库存为 0")
+		fmt.Printf("✅ Redis 库存正常 (剩余: %d，无超卖)\n", stock)
 	}
 	if orderCount != successCount {
 		fmt.Printf("❌ 数据库订单数与成功数不一致 (订单: %d, 成功: %d)\n", orderCount, successCount)
