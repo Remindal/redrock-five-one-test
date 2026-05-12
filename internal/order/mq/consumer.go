@@ -11,22 +11,33 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func StartConsumer() {
-	msgs, err := dal.RabbitCh.Consume(
-		"seckill_queue",
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Fatalf("rabbitmq consume error: %v", err)
-	}
+func StartConsumer(workers int) {
+	for i := 0; i < workers; i++ {
+		go func(id int) {
+			ch, err := dal.RabbitConn.Channel()
+			if err != nil {
+				log.Fatalf("rabbitmq channel error: %v", err)
+			}
+			defer ch.Close()
 
-	for d := range msgs {
-		processMessage(d)
+			msgs, err := ch.Consume(
+				"seckill_queue",
+				"",
+				false,
+				false,
+				false,
+				false,
+				nil,
+			)
+			if err != nil {
+				log.Fatalf("rabbitmq consume error: %v", err)
+			}
+
+			log.Printf("consumer worker %d started", id)
+			for d := range msgs {
+				processMessage(d)
+			}
+		}(i)
 	}
 }
 

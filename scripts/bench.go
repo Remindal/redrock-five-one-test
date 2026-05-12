@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -9,11 +10,15 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 const (
 	gatewayURL  = "http://127.0.0.1:8888"
-	activityId  = int64(8)
+	activityId  = int64(10)
 	concurrency = 5000
 	duration    = 10 * time.Second
 )
@@ -140,4 +145,73 @@ func main() {
 	fmt.Printf("失败/超时:  %d\n", fail)
 	fmt.Printf("总请求:     %d\n", total)
 	fmt.Printf("QPS:        %.2f\n", float64(total)/elapsed.Seconds())
+
+	// Step 3: 等待 MQ 消费完成
+	fmt.Println("\n等待 MQ 消费完成...")
+	time.Sleep(30 * time.Second)
+
+	// Step 4: 一致性检查
+	fmt.Println("\n========== 一致性检查 ==========")
+	checkConsistency(activityId, success)
+}
+
+func checkConsistency(activityId int64, successCount int64) {
+	ctx := context.Background()
+
+	// 1. Redis 库存
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+	})
+	stockKey := fmt.Sprintf("seckill:stock:%d", activityId)
+	stock, err := rdb.Get(ctx, stockKey).Int64()
+	if err == redis.Nil {
+		stock = 0
+	} else if err != nil {
+		fmt.Printf("Redis 查询错误: %v\n", err)
+		stock = -1
+	}
+	fmt.Printf("Redis 剩余库存: %d (期望: 0)\n", stock)
+
+	// 2. MySQL 订单总数
+	db, err := gorm.Open(mysql.Open("root:root@tcp(127.0.0.1:3307)/seckill?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
+	if err != nil {
+		fmt.Printf("MySQL 连接错误: %v\n", err)
+		return
+	}
+
+	var orderCount int64
+	db.Raw("SELECT COUNT(*) FROM `order` WHERE activity_id = ?", activityId).Scan(&orderCount)
+	fmt.Printf("数据库订单数: %d (期望: %d)\n", orderCount, successCount)
+
+	// 3. 重复用户检查
+	var uniqueCount int64
+	db.Raw("SELECT COUNT(DISTINCT user_id) FROM `order` WHERE activity_id = ?", activityId).Scan(&uniqueCount)
+	fmt.Printf("独立用户数: %d (重复: %v)\n", uniqueCount, uniqueCount != orderCount)
+
+	// 4. 结论
+	fmt.Println("\n========== 检查结论 ==========")
+	pass := true
+	if stock != 0 {
+		fmt.Printf("❌ Redis 库存不为 0 (实际: %d)\n", stock)
+		pass = false
+	} else {
+		fmt.Println("✅ Redis 库存为 0")
+	}
+	if orderCount != successCount {
+		fmt.Printf("❌ 数据库订单数与成功数不一致 (订单: %d, 成功: %d)\n", orderCount, successCount)
+		pass = false
+	} else {
+		fmt.Println("✅ 订单数与成功数一致")
+	}
+	if uniqueCount != orderCount {
+		fmt.Printf("❌ 存在重复用户订单 (独立: %d, 总数: %d)\n", uniqueCount, orderCount)
+		pass = false
+	} else {
+		fmt.Println("✅ 无重复用户订单")
+	}
+	if pass {
+		fmt.Println("\n🎉 一致性检查全部通过")
+	} else {
+		fmt.Println("\n⚠️ 一致性检查未通过")
+	}
 }

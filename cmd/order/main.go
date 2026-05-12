@@ -23,7 +23,7 @@ func main() {
 	dal.Init(cfg)
 	dal.InitRabbitMQ(cfg.RabbitMQ.Addr)
 
-	go mq.StartConsumer()
+	go mq.StartConsumer(5)
 
 	r, err := etcd.NewEtcdRegistry(cfg.Etcd.Endpoints)
 	if err != nil {
