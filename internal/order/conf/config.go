@@ -15,25 +15,21 @@ type Config struct {
 		DSN string `yaml:"dsn"`
 	} `yaml:"mysql"`
 
-	MQ struct {
-		Type           string `yaml:"type"`
-		RedisStreamKey string `yaml:"redis_stream_key"`
-		RedisAddr      string `yaml:"redis_addr"`
-	} `yaml:"mq"`
-
-	Etcd struct {
-		Endpoints []string `yaml:"endpoints"`
-	} `yaml:"etcd"`
-
 	Redis struct {
-		Addr     string `yaml:"addr"`
-		Password string `yaml:"password"`
-		DB       int    `yaml:"db"`
+		Addr          string   `yaml:"addr"`
+		SentinelAddrs []string `yaml:"sentinel_addrs"`
+		MasterName    string   `yaml:"master_name"`
+		Password      string   `yaml:"password"`
+		DB            int      `yaml:"db"`
 	} `yaml:"redis"`
 
 	RabbitMQ struct {
 		Addr string `yaml:"addr"`
 	} `yaml:"rabbitmq"`
+
+	Etcd struct {
+		Endpoints []string `yaml:"endpoints"`
+	} `yaml:"etcd"`
 }
 
 func LoadConfig() *Config {

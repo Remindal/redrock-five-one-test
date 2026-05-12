@@ -2,9 +2,14 @@ host: 0.0.0.0
 port: 8888
 
 redis:
-  addr: "127.0.0.1:6379"
+  sentinel_addrs:
+    - "redis-sentinel-1:26379"
+    - "redis-sentinel-2:26379"
+    - "redis-sentinel-3:26379"
+  master_name: "mymaster"
   password: ""
   db: 0
+  addr: "redis-master:6379"
 
 etcd:
   endpoints:

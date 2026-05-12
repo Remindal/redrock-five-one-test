@@ -4,19 +4,19 @@ port: 8083
 mysql:
   dsn: "root:root@tcp(127.0.0.1:3307)/seckill?charset=utf8mb4&parseTime=True&loc=Local"
 
-mq:
-  type: "redis_stream"
-  redis_stream_key: "seckill:queue"
-  redis_addr: "127.0.0.1:6379"
-
 etcd:
   endpoints:
     - "127.0.0.1:2379"
 
 redis:
-    addr: "127.0.0.1:6379"
-    password: ""
-    db: 0
+  sentinel_addrs:
+    - "redis-sentinel-1:26379"
+    - "redis-sentinel-2:26379"
+    - "redis-sentinel-3:26379"
+  master_name: "mymaster"
+  password: ""
+  db: 0
+  addr: "redis-master:6379"
 
 rabbitmq:
-    addr: "amqp://admin:admin@127.0.0.1:5672/"
+  addr: "amqp://admin:admin@127.0.0.1:5672/"

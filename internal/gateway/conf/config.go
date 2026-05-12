@@ -11,9 +11,11 @@ type Config struct {
 	Host  string `yaml:"host"`
 	Port  string `yaml:"port"`
 	Redis struct {
-		Addr     string `yaml:"addr"`
-		Password string `yaml:"password"`
-		DB       int    `yaml:"db"`
+		Addr          string   `yaml:"addr"`
+		SentinelAddrs []string `yaml:"sentinel_addrs"`
+		MasterName    string   `yaml:"master_name"`
+		Password      string   `yaml:"password"`
+		DB            int      `yaml:"db"`
 	} `yaml:"redis"`
 	Etcd struct {
 		Endpoints []string `yaml:"endpoints"`

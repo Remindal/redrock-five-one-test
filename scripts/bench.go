@@ -13,8 +13,8 @@ import (
 
 const (
 	gatewayURL  = "http://127.0.0.1:8888"
-	activityId  = int64(4)
-	concurrency = 3000
+	activityId  = int64(7)
+	concurrency = 5000
 	duration    = 10 * time.Second
 )
 
@@ -31,7 +31,7 @@ func main() {
 	}
 	client := &http.Client{
 		Transport: transport,
-		Timeout:   3 * time.Second,
+		Timeout:   15 * time.Second,
 	}
 
 	// Step 1: 批量登录获取 Token（每个 worker 一个独立用户）
