@@ -46,13 +46,19 @@ func InitRabbitMQ(addr string) {
 }
 
 func SendSeckillMessage(ctx context.Context, activityId int64, userId string) error {
+	ch, err := RabbitConn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
 	msg := SeckillMessage{
 		ActivityId: activityId,
 		UserId:     userId,
 	}
 	body, _ := json.Marshal(msg)
 
-	return RabbitCh.PublishWithContext(ctx,
+	return ch.PublishWithContext(ctx,
 		"",
 		"seckill_queue",
 		false,

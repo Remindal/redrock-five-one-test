@@ -13,7 +13,7 @@ import (
 
 const (
 	gatewayURL  = "http://127.0.0.1:8888"
-	activityId  = int64(7)
+	activityId  = int64(8)
 	concurrency = 5000
 	duration    = 10 * time.Second
 )
