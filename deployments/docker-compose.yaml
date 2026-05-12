@@ -50,6 +50,11 @@ services:
     restart: always
     ports:
       - "26379:26379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     command: >
       sh -c "while [ -z \"$$(getent hosts redis-master | awk '{print $$1}')\" ]; do sleep 1; done &&
              MASTER_IP=$$(getent hosts redis-master | awk '{print $$1}') &&
@@ -68,6 +73,11 @@ services:
     image: redis:7-alpine
     container_name: seckill-sentinel-2
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     command: >
       sh -c "while [ -z \"$$(getent hosts redis-master | awk '{print $$1}')\" ]; do sleep 1; done &&
              MASTER_IP=$$(getent hosts redis-master | awk '{print $$1}') &&
@@ -86,6 +96,11 @@ services:
     image: redis:7-alpine
     container_name: seckill-sentinel-3
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     command: >
       sh -c "while [ -z \"$$(getent hosts redis-master | awk '{print $$1}')\" ]; do sleep 1; done &&
              MASTER_IP=$$(getent hosts redis-master | awk '{print $$1}') &&
